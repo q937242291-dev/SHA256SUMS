@@ -1,0 +1,3 @@
+Inspect the visible declarations in the shortlisted files.
+Return JSON with locations, each containing file, symbol, start_line, and end_line.
+Choose source locations to read for the issue, including intermediate binding sites required to connect the issue clue to the proposed implementation.

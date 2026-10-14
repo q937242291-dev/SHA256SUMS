@@ -1,0 +1,80 @@
+{
+  "seed": 2027,
+  "cutoff": 5,
+  "scopes": {
+    "table1": "full",
+    "figure3": "lite",
+    "table2": "lite",
+    "table4": "full",
+    "table5": "lite",
+    "table6": "lite",
+    "table7": "lite",
+    "table8": "full",
+    "table9": "lite",
+    "table10": "lite",
+    "table11": "lite",
+    "table12": "lite"
+  },
+  "agents": [
+    "Agentless",
+    "AutoCodeRover",
+    "OpenHands",
+    "SWE-agent",
+    "Augment",
+    "Codex",
+    "Claude Code"
+  ],
+  "models": [
+    "DeepSeek-v3.2",
+    "GPT-5.5",
+    "Claude 4.5"
+  ],
+  "native_agents": [
+    "Agentless",
+    "AutoCodeRover",
+    "OpenHands",
+    "SWE-agent",
+    "Augment"
+  ],
+  "selected_chain_agents": [
+    "Codex",
+    "Claude Code"
+  ],
+  "selected_chain_models": [
+    "DeepSeek-v3.2",
+    "GPT-5.5"
+  ],
+  "tool_agent": "Agentless",
+  "tool_models": [
+    "DeepSeek-v3.2",
+    "GPT-5.5"
+  ],
+  "tool_modes": [
+    "check",
+    "trap",
+    "multi"
+  ],
+  "category_variants": {
+    "DeepSeek-v3.2": {
+      "None": "check",
+      "Configuration": "check",
+      "Lexical": "multi",
+      "Security FP": "trap",
+      "Structural": "trap",
+      "Symptom": "multi"
+    },
+    "GPT-5.5": {
+      "None": "trap",
+      "Configuration": "check",
+      "Lexical": "trap",
+      "Security FP": "multi",
+      "Structural": "multi",
+      "Symptom": "check"
+    }
+  },
+  "rate_unit": "percent",
+  "rate_change_unit": "percentage_points",
+  "edge_f1_unit": "0_to_1",
+  "figure_token_scale": 7300,
+  "figure_time_scale_seconds": 310
+}

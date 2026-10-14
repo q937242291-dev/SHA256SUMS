@@ -1,0 +1,14 @@
+{
+  "agent_system.txt": "99f0a138af3b9a6c52945215cc86ec05164c57b6a381ab94ce9f05ead26f44e7",
+  "candidate_selection.txt": "4cd99d474b53f0f745db065adea26cbd586a368a5a61f99ea8ad2c04b8754d47",
+  "guide_check.txt": "fe861fded9d3360ccf4fcb14a82eb48f8f034adabf9bee83cf2f5c8556bc6b13",
+  "guide_multi.txt": "625a9a174b40795d9507d282a17122614cfbeb1c007752044432cca879e8fe59",
+  "guide_trap.txt": "05fd4ebf10f23859c9f9d3c8dfa82826e4139500f578c74288b333144ffa62b0",
+  "oracle_system.txt": "e56bcd9a86b52e581a3a724b89ed7a5a1fbf2dd271752d54d57d12d71d7674c2",
+  "source_tools.txt": "eb5f786135ca4a09dcd282375361ee5f20e2974edff0bd9b77b87346bdc97b3d",
+  "staged_files.txt": "e191d9275d76ccb80f2d4b757319359b8a952045f04c4b6635e482fb5e220fd2",
+  "staged_symbols.txt": "10bc74fb8d48b3d0164158d0c4263b9e3f35fd42e9765dfee40bb21634a8d014",
+  "structured_search.txt": "189194b4c0490f1d97d54208c91c7ea6d0dd725820d8c7923654c016c08ba350",
+  "verifier_rerank.txt": "ab7be1c7af69624559bdc2967b91cc7a0b940bfdf6ddb80ae2b978bbb1b5a14b",
+  "verifier_system.txt": "82890e1ea36761ae0dae642e9d6d171c93c1f915b2f2c97b5b13296a93cfc932"
+}

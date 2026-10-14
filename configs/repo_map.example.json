@@ -1,0 +1,6 @@
+{
+  "django/django": "repos/django",
+  "astropy/astropy": "repos/astropy",
+  "NodeBB/NodeBB": "repos/NodeBB",
+  "element-hq/element-web": "repos/element-web"
+}

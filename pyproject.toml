@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ptrace-swe"
+version = "1.1.0"
+description = "Trajectory-aware evaluation for software engineering agents"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+figures = ["matplotlib>=3.7,<4", "numpy>=1.24,<3"]
+sampling = ["scipy>=1.11,<2"]
+
+[project.scripts]
+ptrace = "ptrace.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ptrace*"]
+
+[tool.setuptools.package-data]
+ptrace = ["prompt_templates/*.txt"]

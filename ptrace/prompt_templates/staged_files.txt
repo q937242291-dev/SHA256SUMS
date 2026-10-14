@@ -1,0 +1,3 @@
+Localize the supplied issue at file level using the repository file list.
+Return JSON with predicted_files as an ordered shortlist of repository-relative paths.
+Use visible issue clues to select files for inspection. These choices are retrieval proposals; source observations establish their relevance in later stages.

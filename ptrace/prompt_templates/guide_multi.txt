@@ -1,0 +1,10 @@
+Apply multi-hop guidance to the supplied baseline predictions and observed evidence.
+Compose source-checked intermediate relations from the visible issue clue to each proposed editing file.
+Use the same agent, pre-fix revision, and recorded retrieval contract as the baseline.
+Seek the missing evidence bridge through tests, wrappers, dispatchers, imports, configuration consumers, and implementation symbols as needed.
+Inspect each relation at its source site using authorized tools. Cite the observed step, file, and line range supporting the binding.
+Return complete directed alternatives. One complete supported alternative is sufficient; fragments from unrelated alternatives do not form a route.
+Count relations as hops. Repeated reads or searches do not increase the hop count.
+Return final predicted_files, routes, and selected_route_id, or withdraw predictions whose evidence bridge remains unsupported.
+Gold paths, target-file labels, and evaluator annotations remain evaluator-only.
+Independent source auditing checks the intermediate bindings and the proposed issue-to-file relation.

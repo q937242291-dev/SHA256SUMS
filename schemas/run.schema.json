@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PTRACE-SWE agent run",
+  "type": "object",
+  "required": [
+    "run_id",
+    "instance_id",
+    "base_commit",
+    "agent",
+    "model",
+    "status",
+    "protocol",
+    "access_contract"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "instance_id": {
+      "type": "string"
+    },
+    "base_commit": {
+      "type": "string"
+    },
+    "agent": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "actual_model": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "agent_revision": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "incomplete",
+        "failed"
+      ]
+    },
+    "condition": {
+      "type": "string"
+    },
+    "protocol": {
+      "type": "string"
+    },
+    "access_contract": {
+      "type": "string"
+    },
+    "predicted_files": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "routes": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "route.schema.json"
+      }
+    },
+    "selected_route_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "observations": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "object",
+        "required": [
+          "step",
+          "base_commit",
+          "spans"
+        ],
+        "properties": {
+          "step": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "base_commit": {
+            "type": "string"
+          },
+          "action": {
+            "type": "object"
+          },
+          "spans": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "file",
+                "start_line",
+                "end_line",
+                "text"
+              ],
+              "properties": {
+                "file": {
+                  "type": "string"
+                },
+                "start_line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "end_line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "files": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "time_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "file_count_definition": {
+          "type": "string"
+        }
+      }
+    },
+    "baseline_run_id": {
+      "type": "string"
+    },
+    "retrieval_contract": {"type": "object", "properties": {"base_commit": {"type": "string"}, "allowed_actions": {"type": "array", "items": {"type": "string"}}, "max_steps": {"type": "integer", "minimum": 1}, "search_limit": {"type": "integer", "minimum": 1}}},
+    "baseline_input_signature": {
+      "type": "string"
+    },
+    "weight": {
+      "type": "number",
+      "minimum": 0
+    },
+    "model_patch": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+For each supplied candidate, return its candidate_id, scores, evidence_span_ids, and rationale.
+scores contains every configured field, with each value in [0,1]:
+issue_anchoring: the observed issue clue connects to the candidate's route.
+relation_grounding: returned source sites establish the proposed directed bindings.
+evidence_coverage: the admitted observations cover the required intermediate relations.
+endpoint_explanation: the visible route explains the reported behavior at the proposed editing file.
+Use source span IDs from the supplied context for evidence references.
+Assign relation_grounding=0 and evidence_coverage=0 when the admitted source observations do not establish a complete candidate route.
+Use the candidate's observed relations and the issue, without target-file labels or reference-answer annotations.
+Return {"candidates":[{"candidate_id":"...","scores":{"issue_anchoring":0.0,"relation_grounding":0.0,"evidence_coverage":0.0,"endpoint_explanation":0.0},"evidence_span_ids":[],"rationale":"..."}]}.

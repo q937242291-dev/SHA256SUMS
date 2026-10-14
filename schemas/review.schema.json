@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Independent source relation audit",
+  "type": "object",
+  "required": [
+    "run_id",
+    "route_id",
+    "independent",
+    "reviewer_id",
+    "issue_anchored",
+    "endpoint_consistent",
+    "node_eligibility",
+    "edge_support"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "route_id": {
+      "type": "string"
+    },
+    "independent": {
+      "const": true
+    },
+    "reviewer_id": {
+      "type": "string"
+    },
+    "issue_anchored": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "endpoint_consistent": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "node_eligibility": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "boolean",
+          "null"
+        ]
+      }
+    },
+    "edge_support": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "supported",
+          "anchors"
+        ],
+        "properties": {
+          "supported": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "anchors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "kind",
+                "sha256"
+              ],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "issue",
+                    "source"
+                  ]
+                },
+                "file": {
+                  "type": "string"
+                },
+                "base_commit": {
+                  "type": "string"
+                },
+                "start_line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "end_line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "start_char": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "end_char": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

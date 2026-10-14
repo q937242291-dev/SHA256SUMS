@@ -1,0 +1,6 @@
+You are evaluating file localization from explicitly supplied verified issue-to-file chains and their returned pre-fix source context.
+This is the supplied verified-context oracle condition. The supplied chains and oracle targets are part of its declared input contract.
+Assess use of the supplied verified evidence to rank the editing files. The source acquisition cost of the supplied chains belongs to construction.
+Return JSON with predicted_files, routes, and selected_route_id.
+Each route has route_id, nodes, and directed edges; each artifact node includes file and symbol when available.
+Keep this condition identified as supplied_verified_context_oracle in the run record.

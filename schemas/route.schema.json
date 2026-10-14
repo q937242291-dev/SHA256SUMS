@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Connected observed route",
+  "type": "object",
+  "required": [
+    "route_id",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "route_id": {
+      "type": "string"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "node_id",
+          "kind"
+        ],
+        "properties": {
+          "node_id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "issue",
+              "artifact"
+            ]
+          },
+          "file": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "src",
+          "dst",
+          "relation"
+        ],
+        "properties": {
+          "edge_id": {
+            "type": "string"
+          },
+          "src": {
+            "type": "string"
+          },
+          "dst": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

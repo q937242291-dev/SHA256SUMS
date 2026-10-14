@@ -1,0 +1,8 @@
+Choose one authorized action and return its JSON object.
+search: {"action":"search","query":"literal source text"}
+read: {"action":"read","file":"repository/path.py","start_line":1,"end_line":100}
+symbols: {"action":"symbols","file":"repository/path.py"}
+relations: {"action":"relations","file":"repository/path.py","symbol":"qualified_symbol"}
+finish: {"action":"finish","predicted_files":[],"routes":[],"selected_route_id":null}
+Source tools return observations from the fixed pre-fix revision. Ground route relations in those returned observations.
+For checking, a finish object may additionally contain acceptance='retain', 'revise', or 'withdraw'.

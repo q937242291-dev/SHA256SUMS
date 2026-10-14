@@ -1,0 +1,12 @@
+{
+  "agent": "OpenHands",
+  "revision": "SET_ACTUAL_PINNED_REVISION",
+  "command": [
+    "python",
+    "adapters/official_wrapper.py",
+    "--agent",
+    "OpenHands"
+  ],
+  "working_directory": ".",
+  "timeout_s": 3600
+}

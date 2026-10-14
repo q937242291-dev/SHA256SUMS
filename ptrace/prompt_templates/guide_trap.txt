@@ -1,0 +1,12 @@
+Apply trap-aware guidance to the supplied baseline predictions and observed evidence.
+Use the same agent, pre-fix revision, and recorded retrieval contract as the baseline.
+Inspect plausible shortcuts:
+Lexical: similarly named helpers require an actual resolved call, import, or symbol binding.
+Configuration: connect an option definition or value to its actual consuming implementation.
+Security false positives: follow executable data or control flow and the reported behavior, rather than security terminology alone.
+Structural: verify caller-callee, dispatch, or import relations; directory proximity alone is a discovery clue.
+Symptom: connect the reported symptom, reproducer, or test to the relevant implementation.
+Use authorized source tools to inspect the relation sites and missing bridges.
+Return revised predicted_files, complete routes, and selected_route_id. Retain source-grounded bindings and withdraw unsupported shortcuts.
+Gold paths, target-file labels, mechanism labels, and evaluator annotations remain evaluator-only.
+Independent source auditing determines route validity and evidence support.

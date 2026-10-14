@@ -1,0 +1,12 @@
+{
+  "agent": "Agentless",
+  "revision": "SET_ACTUAL_PINNED_REVISION",
+  "command": [
+    "python",
+    "adapters/official_wrapper.py",
+    "--agent",
+    "Agentless"
+  ],
+  "working_directory": ".",
+  "timeout_s": 3600
+}

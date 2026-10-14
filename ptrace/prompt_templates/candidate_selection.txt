@@ -1,0 +1,4 @@
+Select and rank the supplied unlabeled candidate paths for the visible issue.
+Return selected_path_id, predicted_files, and ranked_path_ids.
+Candidate paths contain artifact descriptions and directed relations without gold/distractor labels.
+This condition provides supplied paths without repository-tool access. Assess route recognition from the supplied issue and candidate content.

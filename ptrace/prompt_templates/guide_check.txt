@@ -1,0 +1,9 @@
+Apply generate-then-check to the supplied baseline predictions and observed evidence.
+Check the baseline's proposed issue-to-file routes one relation at a time.
+Use the same agent, pre-fix revision, and recorded retrieval contract as the baseline.
+For every retained route, identify the issue clue, intermediate artifacts, source bindings, and proposed editing endpoint.
+Use authorized source tools to inspect missing evidence sites when the retrieval contract permits further retrieval.
+Accept a supported route, revise a broken route, or withdraw a prediction when its relation remains unsupported.
+Return acceptance='retain', 'revise', or 'withdraw' with final predicted_files, routes, and selected_route_id.
+Gold paths, target-file labels, and evaluator annotations remain evaluator-only. Judge the proposed endpoint using the visible issue and source evidence.
+Independent source auditing determines route validity and evidence support.

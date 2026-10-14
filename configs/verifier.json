@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "evidence_scope": "baseline_observations",
+  "score_fields": ["issue_anchoring", "relation_grounding", "evidence_coverage", "endpoint_explanation"],
+  "score_weights": {"issue_anchoring": 0.2, "relation_grounding": 0.4, "evidence_coverage": 0.3, "endpoint_explanation": 0.1},
+  "acceptance_threshold": 0.5,
+  "max_files": 10
+}

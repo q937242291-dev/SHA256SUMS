@@ -1,0 +1,4 @@
+Choose source artifacts whose outgoing calls or imports may explain the supplied issue.
+Use the visible declarations and recorded source observations.
+Return JSON with artifacts, each containing file and symbol.
+The source-relation tool will inspect the actual relation sites for these choices.

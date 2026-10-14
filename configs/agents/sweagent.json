@@ -1,0 +1,12 @@
+{
+  "agent": "SWE-agent",
+  "revision": "SET_ACTUAL_PINNED_REVISION",
+  "command": [
+    "python",
+    "adapters/official_wrapper.py",
+    "--agent",
+    "SWE-agent"
+  ],
+  "working_directory": ".",
+  "timeout_s": 3600
+}

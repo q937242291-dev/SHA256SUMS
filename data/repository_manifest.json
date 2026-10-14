@@ -1,0 +1,234 @@
+[
+  {
+    "repo": "NodeBB/NodeBB",
+    "public_url": "https://github.com/NodeBB/NodeBB",
+    "task_records": 44,
+    "languages": [
+      "javascript"
+    ]
+  },
+  {
+    "repo": "ansible/ansible",
+    "public_url": "https://github.com/ansible/ansible",
+    "task_records": 96,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "astropy/astropy",
+    "public_url": "https://github.com/astropy/astropy",
+    "task_records": 28,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "django/django",
+    "public_url": "https://github.com/django/django",
+    "task_records": 344,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "element-hq/element-web",
+    "public_url": "https://github.com/element-hq/element-web",
+    "task_records": 56,
+    "languages": [
+      "javascript"
+    ]
+  },
+  {
+    "repo": "flipt-io/flipt",
+    "public_url": "https://github.com/flipt-io/flipt",
+    "task_records": 85,
+    "languages": [
+      "go"
+    ]
+  },
+  {
+    "repo": "future-architect/vuls",
+    "public_url": "https://github.com/future-architect/vuls",
+    "task_records": 62,
+    "languages": [
+      "go"
+    ]
+  },
+  {
+    "repo": "gravitational/teleport",
+    "public_url": "https://github.com/gravitational/teleport",
+    "task_records": 76,
+    "languages": [
+      "go"
+    ]
+  },
+  {
+    "repo": "internetarchive/openlibrary",
+    "public_url": "https://github.com/internetarchive/openlibrary",
+    "task_records": 91,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "marshmallow-code/marshmallow",
+    "public_url": "https://github.com/marshmallow-code/marshmallow",
+    "task_records": 2,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "matplotlib/matplotlib",
+    "public_url": "https://github.com/matplotlib/matplotlib",
+    "task_records": 56,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "mwaskom/seaborn",
+    "public_url": "https://github.com/mwaskom/seaborn",
+    "task_records": 6,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "navidrome/navidrome",
+    "public_url": "https://github.com/navidrome/navidrome",
+    "task_records": 57,
+    "languages": [
+      "go"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "public_url": "https://github.com/pallets/flask",
+    "task_records": 4,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "protonmail/webclients",
+    "public_url": "https://github.com/protonmail/webclients",
+    "task_records": 65,
+    "languages": [
+      "javascript"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "public_url": "https://github.com/psf/requests",
+    "task_records": 13,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "pvlib/pvlib-python",
+    "public_url": "https://github.com/pvlib/pvlib-python",
+    "task_records": 5,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "pydata/xarray",
+    "public_url": "https://github.com/pydata/xarray",
+    "task_records": 27,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "pydicom/pydicom",
+    "public_url": "https://github.com/pydicom/pydicom",
+    "task_records": 5,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "pylint-dev/astroid",
+    "public_url": "https://github.com/pylint-dev/astroid",
+    "task_records": 5,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "pylint-dev/pylint",
+    "public_url": "https://github.com/pylint-dev/pylint",
+    "task_records": 16,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "pytest-dev/pytest",
+    "public_url": "https://github.com/pytest-dev/pytest",
+    "task_records": 36,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "pyvista/pyvista",
+    "public_url": "https://github.com/pyvista/pyvista",
+    "task_records": 1,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "qutebrowser/qutebrowser",
+    "public_url": "https://github.com/qutebrowser/qutebrowser",
+    "task_records": 79,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "scikit-learn/scikit-learn",
+    "public_url": "https://github.com/scikit-learn/scikit-learn",
+    "task_records": 53,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "sphinx-doc/sphinx",
+    "public_url": "https://github.com/sphinx-doc/sphinx",
+    "task_records": 60,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "sqlfluff/sqlfluff",
+    "public_url": "https://github.com/sqlfluff/sqlfluff",
+    "task_records": 5,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "sympy/sympy",
+    "public_url": "https://github.com/sympy/sympy",
+    "task_records": 150,
+    "languages": [
+      "python"
+    ]
+  },
+  {
+    "repo": "tutao/tutanota",
+    "public_url": "https://github.com/tutao/tutanota",
+    "task_records": 20,
+    "languages": [
+      "typescript"
+    ]
+  }
+]

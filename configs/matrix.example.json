@@ -1,0 +1,34 @@
+{
+  "agents": {
+    "Agentless": "configs/agents/agentless.json",
+    "AutoCodeRover": "configs/agents/autocoderover.json",
+    "OpenHands": "configs/agents/openhands.json",
+    "SWE-agent": "configs/agents/sweagent.json",
+    "Augment": "configs/agents/augment.json",
+    "Codex": "configs/agents/codex.json",
+    "Claude Code": "configs/agents/claude_code.json"
+  },
+  "models": {
+    "DeepSeek-v3.2": {
+      "environment_from": {
+        "PTRACE_API_KEY": "PTRACE_DS32_API_KEY",
+        "PTRACE_BASE_URL": "PTRACE_DS32_BASE_URL",
+        "PTRACE_MODEL": "PTRACE_DS32_MODEL"
+      }
+    },
+    "GPT-5.5": {
+      "environment_from": {
+        "PTRACE_API_KEY": "PTRACE_GPT55_API_KEY",
+        "PTRACE_BASE_URL": "PTRACE_GPT55_BASE_URL",
+        "PTRACE_MODEL": "PTRACE_GPT55_MODEL"
+      }
+    },
+    "Claude 4.5": {
+      "environment_from": {
+        "PTRACE_API_KEY": "PTRACE_CLAUDE45_API_KEY",
+        "PTRACE_BASE_URL": "PTRACE_CLAUDE45_BASE_URL",
+        "PTRACE_MODEL": "PTRACE_CLAUDE45_MODEL"
+      }
+    }
+  }
+}
