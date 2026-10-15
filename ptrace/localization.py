@@ -47,7 +47,7 @@ def staged_localization(instance, tools, llm, max_files=10, max_chars=60000):
 def structured_localization(instance, tools, llm, max_files=5):
     """Rank declarations and expose their resolved source-relation neighborhood."""
     from .baselines import bm25
-    from .source_graph import SourceGraph
+    from .artifact_graph import ArtifactGraph as SourceGraph
     graph = SourceGraph(tools.snapshot)
     tools._graph = graph
     names = {}

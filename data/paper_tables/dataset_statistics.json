@@ -1,0 +1,23 @@
+{
+  "kind": "paper_reported_statistics",
+  "source_document_sha256": "b4d797397a69a64b630a5195707d0a610ac3bbfe917aa50d50d1ed5708394ae4",
+  "source_page": 3,
+  "full_tasks": 1547,
+  "repositories": 29,
+  "reference_paths": 4641,
+  "hard_negatives": 19043,
+  "lite_tasks": 300,
+  "lite_categories": {
+    "None": 39,
+    "Configuration": 57,
+    "Lexical": 60,
+    "Security FP": 45,
+    "Structural": 54,
+    "Symptom": 45
+  },
+  "lite_hops": {
+    "1-3": 151,
+    "4-5": 89,
+    "6+": 60
+  }
+}

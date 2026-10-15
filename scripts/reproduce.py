@@ -15,6 +15,7 @@ from ptrace.reporting import paper_tables
 from ptrace.repository import Snapshot
 from ptrace.source_graph import SourceGraph
 from ptrace.dataset import validate
+from ptrace.source_cache import verify_source_cache
 
 
 def create_fixture(directory):
@@ -76,6 +77,7 @@ def main():
     parser.add_argument("--data", default="data")
     args = parser.parse_args()
     counts = validate(args.data)
+    verify_source_cache(args.data)
     print("Dataset validation passed")
     root = Path(__file__).resolve().parents[1]
     subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-q"], cwd=root, check=True)

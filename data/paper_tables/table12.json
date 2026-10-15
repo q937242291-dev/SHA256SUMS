@@ -1,0 +1,50 @@
+{
+  "source": {
+    "document": "WWW2027_issuebench (2).pdf",
+    "sha256": "b4d797397a69a64b630a5195707d0a610ac3bbfe917aa50d50d1ed5708394ae4",
+    "page": 14
+  },
+  "kind": "paper_reported_table",
+  "rows": [
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "categories": "5 named",
+      "denominator": 5,
+      "PV_gain": 2,
+      "FC_reduction": 3,
+      "File_gain": 1,
+      "Edge_gain": 4
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "categories": "6 incl None",
+      "denominator": 6,
+      "PV_gain": 2,
+      "FC_reduction": 4,
+      "File_gain": 1,
+      "Edge_gain": 5
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "categories": "5 named",
+      "denominator": 5,
+      "PV_gain": 2,
+      "FC_reduction": 2,
+      "File_gain": 0,
+      "Edge_gain": 3
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "categories": "6 incl None",
+      "denominator": 6,
+      "PV_gain": 3,
+      "FC_reduction": 3,
+      "File_gain": 0,
+      "Edge_gain": 4
+    }
+  ]
+}

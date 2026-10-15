@@ -115,7 +115,7 @@ class Tools:
 
     def relations(self, file, symbol, limit=20):
         """Return source spans for resolved calls and imports of an artifact."""
-        from .source_graph import SourceGraph
+        from .artifact_graph import ArtifactGraph as SourceGraph
         if self._graph is None:
             self._graph = SourceGraph(self.snapshot)
         nid = file + "::" + (symbol or "$module")

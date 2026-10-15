@@ -1,5 +1,6 @@
 """Credential redaction and release-file scanning."""
 import re
+import gzip
 from pathlib import Path
 
 SECRET_PATTERNS = [
@@ -48,7 +49,11 @@ def scan(root):
             continue
         if p.suffix in (".zip", ".png", ".pdf"):
             continue
-        text = p.read_text(encoding="utf-8", errors="ignore")
+        if p.suffix == '.gz':
+            with gzip.open(p,'rt',encoding='utf-8',errors='ignore') as stream:
+                text = stream.read()
+        else:
+            text = p.read_text(encoding="utf-8", errors="ignore")
         for i, pat in enumerate(SECRET_PATTERNS):
             if pat.search(text):
                 findings.append({"file": p.relative_to(root).as_posix(), "kind": f"credential_pattern_{i}"})

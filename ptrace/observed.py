@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from .audit import anchor_observed, audit_route
 from .io import digest
-from .source_graph import SourceGraph
+from .artifact_graph import ArtifactGraph as SourceGraph
 
 
 def observed_routes(instance, run, snapshot, graph=None, prefix=None, limit=100):
@@ -22,29 +22,47 @@ def observed_routes(instance, run, snapshot, graph=None, prefix=None, limit=100)
 def graph_review(instance, truth, run, route, graph):
     """Audit a proposal against revision-specific graph relations."""
     nodes = {n["node_id"]: n for n in route.get("nodes", [])}
-    eligible = {}
+    eligible, canonical = {}, {}
     for nid, node in nodes.items():
         if node.get("kind") == "issue":
             eligible[nid] = True
         elif node.get("file"):
             key = node["file"] + "::" + (node.get("symbol") or "$module")
-            eligible[nid] = key in graph.nodes if node["file"].endswith(".py") else None
+            resolved=graph.nodes.get(key)
+            if resolved is None:
+                value=node.get('value') or node.get('symbol')
+                matches=[n for n in graph.nodes.values() if n.get('file')==node['file']
+                         and n.get('value')==value and n.get('symbol_kind') in ('literal','option_name')]
+                if len(matches)==1:
+                    resolved=matches[0]
+            canonical[nid]=resolved
+            if resolved is not None:
+                eligible[nid]=True
+            else:
+                try:
+                    graph.snapshot.text(node['file'])
+                    eligible[nid]=None
+                except ValueError:
+                    eligible[nid]=False
         else:
             eligible[nid] = False
     mentions = {e["dst"]: e for e in graph.issue_edges(instance)}
     support = {}
     for position, edge in enumerate(route.get("edges", []), 1):
-        src, dst = nodes.get(edge.get("src"), {}), nodes.get(edge.get("dst"), {})
+        src = canonical.get(edge.get('src')) or nodes.get(edge.get('src'),{})
+        dst = canonical.get(edge.get('dst')) or nodes.get(edge.get('dst'),{})
         match = None
         if src.get("kind") == "issue" and edge.get("relation") == "mentions":
             key = dst.get("file", "") + "::" + (dst.get("symbol") or "$module")
             match = mentions.get(key)
         elif src and dst:
-            match = graph.relation(src, dst, edge.get("relation"))
+            candidates = graph.relation_candidates(src, dst, edge.get("relation"))
+            exact = [candidate for candidate in candidates if candidate['edge_id']==edge.get('edge_id')]
+            visible = [candidate for candidate in candidates
+                       if all(anchor_observed(a,run.get('observations'),instance,graph.snapshot) is True
+                              for a in candidate['anchors'])]
+            match = next(iter(exact or visible or candidates),None)
         judged = True if match else None
-        if match is None and edge.get("relation") in ("mentions", "calls", "test_calls", "imports"):
-            if eligible.get(edge.get("src")) is True and eligible.get(edge.get("dst")) is True:
-                judged = False
         support[edge.get("edge_id", str(position))] = {
             "supported": judged, "anchors": match["anchors"] if match else [],
             "judgment_source": "revision_static_binding",

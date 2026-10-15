@@ -1,0 +1,130 @@
+{
+  "source": {
+    "document": "WWW2027_issuebench (2).pdf",
+    "sha256": "b4d797397a69a64b630a5195707d0a610ac3bbfe917aa50d50d1ed5708394ae4",
+    "page": 13
+  },
+  "kind": "paper_reported_table",
+  "rows": [
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "category": "None",
+      "DeltaPV_count": 0,
+      "FCred_count": 1,
+      "DeltaFile_count": 0,
+      "DeltaSupport_count": 1,
+      "DeltaTokens_mean": 108
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "category": "Configuration",
+      "DeltaPV_count": 0,
+      "FCred_count": 0,
+      "DeltaFile_count": 0,
+      "DeltaSupport_count": 0,
+      "DeltaTokens_mean": 90
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "category": "Lexical",
+      "DeltaPV_count": 2,
+      "FCred_count": 6,
+      "DeltaFile_count": -5,
+      "DeltaSupport_count": 1,
+      "DeltaTokens_mean": 324
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "category": "Security FP",
+      "DeltaPV_count": 1,
+      "FCred_count": 2,
+      "DeltaFile_count": -1,
+      "DeltaSupport_count": 1,
+      "DeltaTokens_mean": 162
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "category": "Structural",
+      "DeltaPV_count": 0,
+      "FCred_count": -3,
+      "DeltaFile_count": 3,
+      "DeltaSupport_count": 0,
+      "DeltaTokens_mean": 198
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "category": "Symptom",
+      "DeltaPV_count": 0,
+      "FCred_count": 1,
+      "DeltaFile_count": -1,
+      "DeltaSupport_count": 0,
+      "DeltaTokens_mean": 126
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "category": "None",
+      "DeltaPV_count": 1,
+      "FCred_count": 1,
+      "DeltaFile_count": -1,
+      "DeltaSupport_count": 0,
+      "DeltaTokens_mean": 144
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "category": "Configuration",
+      "DeltaPV_count": 0,
+      "FCred_count": 0,
+      "DeltaFile_count": 0,
+      "DeltaSupport_count": 0,
+      "DeltaTokens_mean": 90
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "category": "Lexical",
+      "DeltaPV_count": 2,
+      "FCred_count": 2,
+      "DeltaFile_count": 0,
+      "DeltaSupport_count": 2,
+      "DeltaTokens_mean": 162
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "category": "Security FP",
+      "DeltaPV_count": 1,
+      "FCred_count": 1,
+      "DeltaFile_count": 0,
+      "DeltaSupport_count": 1,
+      "DeltaTokens_mean": 126
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "category": "Structural",
+      "DeltaPV_count": 0,
+      "FCred_count": 0,
+      "DeltaFile_count": 0,
+      "DeltaSupport_count": 0,
+      "DeltaTokens_mean": 90
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "category": "Symptom",
+      "DeltaPV_count": 0,
+      "FCred_count": 0,
+      "DeltaFile_count": 0,
+      "DeltaSupport_count": 0,
+      "DeltaTokens_mean": 90
+    }
+  ]
+}

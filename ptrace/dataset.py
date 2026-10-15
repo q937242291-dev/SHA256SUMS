@@ -1,162 +1,34 @@
-"""Dataset normalization, Lite sampling, split generation, and validation."""
+"""Dataset sampling, split generation, and source-grounded validation."""
 import collections
 import hashlib
 import json
 import re
-import zipfile
 from pathlib import Path
 from .io import digest, read_jsonl, write_json, write_jsonl, repo_path
-from .privacy import sanitize
-from .audit import structural_errors
+from .audit import structural_errors, endpoint
 
 CATEGORY_QUOTAS = {"None": 39, "Configuration": 57, "Lexical": 60, "Security FP": 45, "Structural": 54, "Symptom": 45}
 HOP_QUOTAS = {"1-3": 151, "4-5": 89, "6+": 60}
-OLD_HOPS = {"short_1_3": "1-3", "mid_4_5": "4-5", "long_6p": "6+"}
-PATTERNS = {
-    "Configuration": r"\b(config(?:uration)?|setting|option|environment variable|env var|defaults?|ini|yaml|toml|flag)\b",
-    "Lexical": r"\b(rename|named?|naming|attribute|symbol|alias|lookup|namespace|parameter|argument|keyword|identifier)\b",
-    "Security FP": r"\b(secur(?:e|ity)|vulnerab\w*|cve|xss|csrf|authentication|authorization|permission|injection|password|credential|sanitize|escape|unsafe)\b",
-    "Structural": r"\b(inherit\w*|subclass|wrapper|dispatch|import|module|dependency|callback|caller|callee|nested|composition|mixin|interface)\b",
-    "Symptom": r"\b(traceback|exception|error|crash|fail\w*|incorrect|wrong|unexpected|regression|reproduce)\b",
-}
 
 
-def category_scores(text):
-    # Score issue text against the category mechanism patterns.
-    low = text.lower()
-    scores = {k: min(10, len(re.findall(p, low))) for k, p in PATTERNS.items()}
-    scores["None"] = 2.0 if not any(scores.values()) else 0.0
-    scores["Security FP"] *= 1.8
-    scores["Configuration"] *= 1.5
-    scores["Lexical"] *= 1.1
-    return scores
+def artifact_location(value):
+    """Read repository file and qualified-symbol identifiers from artifact text."""
+    parts = value.split("::")
+    candidate = parts[0]
+    extensions = (".py", ".pyi", ".js", ".jsx", ".ts", ".tsx", ".go", ".json", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".md", ".rst", ".txt", ".sh")
+    if not candidate.endswith(extensions) or any(c.isspace() for c in candidate) or candidate.startswith(("http:", "https:")):
+        return {}
+    try:
+        file = repo_path(candidate)
+    except ValueError:
+        return {}
+    result = {"file": file}
+    if len(parts) > 1 and all(re.fullmatch(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*", p) for p in parts[1:]):
+        result["symbol"] = ".".join(parts[1:])
+    return result
 
 
-def classify(text):
-    scores = category_scores(text)
-    return max(CATEGORY_QUOTAS, key=lambda k: (scores[k], -list(CATEGORY_QUOTAS).index(k)))
-
-
-def opaque_id(legacy_id):
-    return "ptx-" + hashlib.sha256(legacy_id.encode()).hexdigest()[:16]
-
-
-def normalize_path(chain, path_id):
-    """Normalize node identities by typed artifact value."""
-    nodes, idmap, canonical = [], {}, {}
-    for n in chain.get("nodes", []):
-        key = (str(n.get("node_type", "artifact")), str(n.get("value", "")))
-        if key not in canonical:
-            nid = f"n{len(nodes)}"
-            canonical[key] = nid
-            kind = "issue" if key[0] in ("issue", "issue_span") else "artifact"
-            obj = {"node_id": nid, "kind": kind, "artifact_type": key[0], "value": key[1]}
-            value = key[1].split("::", 1)[0]
-            if "/" in value and re.search(r"\.[A-Za-z0-9]+$", value) and not value.startswith(("http:", "https:")):
-                try:
-                    obj["file"] = repo_path(value)
-                except ValueError:
-                    pass
-            nodes.append(obj)
-        idmap[n["node_id"]] = canonical[key]
-    edges = [{"edge_id": f"e{i+1}", "src": idmap.get(e.get("src"), "invalid"),
-              "dst": idmap.get(e.get("dst"), "invalid"), "relation": e.get("edge_type", "mentions")}
-             for i, e in enumerate(chain.get("edges", []))]
-    obj = {"route_id": path_id, "nodes": nodes, "edges": edges, "hop_count": len(edges),
-           "source_verified": False, "provenance": "reconstructed_from_supplied_reference",
-           "legacy_quality": chain.get("chain_quality"), "negative_mechanism": chain.get("error_mode")}
-    obj["structural_flags"] = structural_errors(obj)
-    return obj
-
-
-def _read_zip_jsonl(z, name):
-    with z.open(name) as f:
-        return [json.loads(l) for l in f if l.strip()]
-
-
-def rebuild(archive, output):
-    out = Path(output)
-    with zipfile.ZipFile(archive) as z:
-        files = z.namelist()
-        suffix = "/IssueChain-Bench-v5/issuechain_core_v5_with_splits.jsonl"
-        core = next((n for n in files if n.endswith(suffix)), None)
-        if core is None:
-            raise ValueError("The supplied v5 full dataset is required")
-        records = _read_zip_jsonl(z, core)
-        lookup = {}
-        for name in files:
-            if "/baseline_inputs/swebench_jsonl/" in name and name.endswith(".jsonl"):
-                for r in _read_zip_jsonl(z, name):
-                    lookup[r["instance_id"]] = r
-    instances, evaluator, construction, full = [], [], [], []
-    language_by_repo = collections.defaultdict(collections.Counter)
-    for r in records:
-        if r["language"] != "unknown":
-            language_by_repo[r["repo"]][r["language"]]+=1
-    # Infer repository language metadata from target-file extension counts.
-    extension_votes = collections.defaultdict(collections.Counter)
-    extensions = {".py": "python", ".js": "js", ".jsx": "js", ".ts": "ts", ".tsx": "ts", ".go": "go"}
-    for r in records:
-        for item in r["gold_locations"]:
-            if item.get("role") == "root_cause":
-                lang = extensions.get(Path(item["file"]).suffix)
-                if lang:
-                    extension_votes[r["repo"]][lang] += 1
-    for r in sorted(records, key=lambda x: x["instance_id"]):
-        iid, raw = opaque_id(r["instance_id"]), r["instance_id"].split("::")[-1]
-        official = lookup.get(raw)
-        problem = r["issue"].get("body") or r["issue"].get("title", "")
-        lang = r["language"]
-        lang_source = "supplied"
-        if lang == "unknown" and language_by_repo[r["repo"]]:
-            lang = language_by_repo[r["repo"]].most_common(1)[0][0]
-            lang_source = "same_repository_majority"
-        elif lang == "unknown" and extension_votes[r["repo"]]:
-            lang = extension_votes[r["repo"]].most_common(1)[0][0]
-            lang_source = "repository_target_extension_majority"
-        inst = {"instance_id": iid, "source_instance_id": raw, "source_dataset": r["source_dataset"],
-                "repo": r["repo"], "base_commit": r["snapshot"]["base_commit"], "problem_statement": problem,
-                "language": {"js": "javascript", "ts": "typescript"}.get(lang, lang), "language_provenance": lang_source}
-        roots = sorted({l["file"] for l in r["gold_locations"] if l.get("role") == "root_cause"})
-        if not roots:
-            raise ValueError("Record without root-cause targets")
-        category = classify(problem)
-        hop = OLD_HOPS[r["labels"]["eval_hop_tier"]]
-        truth = {"instance_id": iid, "target_files": roots, "target_annotations": r["gold_locations"],
-                 "reference_paths": [normalize_path(c, f"ref-{i+1:02}") for i, c in enumerate(r["gold_success_chains"])],
-                 "hard_negative_paths": [normalize_path(c, f"neg-{i+1:02}") for i, c in enumerate(r["hard_negative_chains"])],
-                 "category": category, "category_provenance": "automatic_keyword_mechanism_nomination",
-                 "category_scores": category_scores(problem), "hop_group": hop,
-                 "hop_group_provenance": "supplied_legacy_complexity_stratum",
-                 "shortest_verified_hops": None, "verified_category": None, "verified_hop_group": None,
-                 "graph_source_verified": False, "negative_source_verified": False,
-                 "verified_reference_paths": [], "verified_negative_paths": [],
-                 "legacy_labels": {k: r["labels"].get(k) for k in ("intent", "issue_type", "security_type", "contamination_risk")}}
-        cons = {"instance_id": iid, "source_instance_id": raw, "source_dataset": r["source_dataset"],
-                "repo": r["repo"], "base_commit": inst["base_commit"], "source_record_present": official is not None}
-        if official:
-            for key in ("patch", "test_patch", "version", "FAIL_TO_PASS", "PASS_TO_PASS", "fail_to_pass", "pass_to_pass",
-                        "environment_setup_commit", "before_repo_set_cmd", "selected_test_files_to_run", "dockerhub_tag"):
-                if key in official:
-                    cons[key] = official[key]
-        public = sanitize(inst)
-        gold = sanitize(truth)
-        instances.append(public); evaluator.append(gold); construction.append(sanitize(cons))
-        full.append({**public, **gold})
-    assert len(instances) == 1547
-    assert sum(len(x["reference_paths"]) for x in evaluator) == 4641
-    assert sum(len(x["hard_negative_paths"]) for x in evaluator) == 19043
-    write_jsonl(out / "issuechain_full.jsonl", full)
-    write_jsonl(out / "instances.jsonl", instances)
-    write_jsonl(out / "evaluator.jsonl", evaluator)
-    write_jsonl(out / "construction_inputs.jsonl", construction)
-    write_json(out / "dataset_spec.json", {"version": "1.0", "seed": 2027,
-               "lite_category_quotas": CATEGORY_QUOTAS, "lite_hop_quotas": HOP_QUOTAS,
-               "source_verified_is_not_inferred_from_legacy_labels": True})
-    return full
-
-
-def select_lite(records, strict=False):
+def select_lite(records, strict=True):
     """Select 300 records with joint category/hop quotas and unique underlying issues.
     
     With strict=True, sampling uses verified_category and verified_hop_group."""
@@ -202,6 +74,69 @@ def select_lite(records, strict=False):
     return sorted(selected, key=lambda x: x["instance_id"])
 
 
+def select_source_lite(records, size=300):
+    """Balance a fixed-size subset using source-verified labels and routes."""
+    eligible = [r for r in records if r.get('graph_source_verified') is True
+                and r.get('verified_category') in CATEGORY_QUOTAS
+                and r.get('verified_hop_group') in HOP_QUOTAS]
+    unique = {}
+    for row in sorted(eligible,key=lambda r:(-len(r['reference_paths']),digest([2027,r['instance_id']]))):
+        unique.setdefault((row['repo'],row['source_instance_id']),row)
+    pool = list(unique.values())
+    if len(pool) < size:
+        raise ValueError('Insufficient source-verified issues for the subset')
+    available = collections.Counter(r['hop_group'] for r in pool)
+    if size==300:
+        try:
+            import numpy as np
+            from scipy.optimize import milp, LinearConstraint, Bounds
+            from scipy.sparse import lil_matrix
+            options=[]
+            for i,row in enumerate(pool):
+                categories={row['verified_category']} | {e['category'] for e in row.get('category_evidence',[])}
+                for category in sorted(categories):
+                    if category in CATEGORY_QUOTAS:
+                        options.append((i,category))
+            categories=list(CATEGORY_QUOTAS)
+            matrix=lil_matrix((len(categories)+len(pool),len(options)))
+            costs=[]
+            for j,(i,category) in enumerate(options):
+                row=pool[i]
+                matrix[categories.index(category),j]=1
+                matrix[len(categories)+i,j]=1
+                costs.append((len(row['reference_paths'])<3)*10 + available[row['hop_group']]/len(pool)
+                             + int(digest([2027,row['instance_id'],category])[:8],16)/16**8/100)
+            quotas=list(CATEGORY_QUOTAS.values())
+            result=milp(np.array(costs),integrality=np.ones(len(options)),bounds=Bounds(0,1),
+                        constraints=LinearConstraint(matrix.tocsr(),np.array(quotas+[0]*len(pool)),
+                                                     np.array(quotas+[1]*len(pool))),
+                        options={'time_limit':30})
+            if result.x is not None:
+                selected=[]
+                for (i,category),value in zip(options,result.x):
+                    if value>.5:
+                        row=pool[i]
+                        row['category']=row['verified_category']=category
+                        row['category_provenance']='source_binding_stratum'
+                        selected.append(row)
+                if len(selected)==size:
+                    return sorted(selected,key=lambda r:r['instance_id'])
+        except ImportError:
+            pass
+    def priority(row):
+        return (len(row['reference_paths']) < 3, available[row['hop_group']], digest([2027,row['instance_id']]))
+    selected = []
+    for category, quota in CATEGORY_QUOTAS.items():
+        candidates = sorted((r for r in pool if r['category']==category),key=priority)
+        selected.extend(candidates[:round(quota*size/300)])
+    chosen = {r['instance_id'] for r in selected}
+    for row in sorted((r for r in pool if r['instance_id'] not in chosen),key=priority):
+        if len(selected)>=size:
+            break
+        selected.append(row)
+    return sorted(selected[:size],key=lambda r:r['instance_id'])
+
+
 def build_splits(instances):
     """Group source variants of the same real issue before supervised splitting."""
     standard = {"train": [], "dev": [], "test": []}
@@ -221,20 +156,45 @@ def build_splits(instances):
 def validate(data_directory):
     d = Path(data_directory)
     full, lite = list(read_jsonl(d / "issuechain_full.jsonl")), list(read_jsonl(d / "issuechain_lite.jsonl"))
+    spec = json.loads((d / 'dataset_spec.json').read_text())
     ids = {r["instance_id"] for r in full}
-    if len(ids) != len(full) or len(full) != 1547 or len(lite) != 300:
+    if (len(ids) != len(full) or len(full) != spec.get('full_records',1547)
+            or len(lite) != spec.get('lite_records',300)
+            or len({r['instance_id'] for r in lite}) != len(lite)):
         raise ValueError("Invalid dataset count or repeated release IDs")
     if not {r["instance_id"] for r in lite} <= ids:
         raise ValueError("Lite must be a subset of full data")
     byid = {r["instance_id"]: r for r in full}
     if any(r != byid[r["instance_id"]] for r in lite):
         raise ValueError("Lite records must be byte-equivalent JSON objects from full data")
-    if dict(collections.Counter(r["category"] for r in lite)) != CATEGORY_QUOTAS:
+    if dict(collections.Counter(r["category"] for r in lite)) != spec['lite_categories']:
         raise ValueError("Lite category quotas mismatch")
-    if dict(collections.Counter(r["hop_group"] for r in lite)) != HOP_QUOTAS:
+    if dict(collections.Counter(r["hop_group"] for r in lite)) != spec['lite_hops']:
         raise ValueError("Lite hop quotas mismatch")
-    if len({(r["repo"], r["source_instance_id"]) for r in lite}) != 300:
+    if len({(r["repo"], r["source_instance_id"]) for r in lite}) != len(lite):
         raise ValueError("Repeated underlying issue in Lite")
+    instances={r['instance_id']:r for r in read_jsonl(d/'instances.jsonl')}
+    truths={r['instance_id']:r for r in read_jsonl(d/'evaluator.jsonl')}
+    if instances.keys()!=ids or truths.keys()!=ids:
+        raise ValueError('Public and evaluator views must cover the Full IDs')
+    if any({**instances[iid],**truths[iid]}!=row for iid,row in byid.items()):
+        raise ValueError('Public/evaluator views disagree with the Full record')
+    for row in full:
+        for key in ('reference_paths','hard_negative_paths'):
+            for route in row[key]:
+                if structural_errors(route) or route.get('source_verified') is not True:
+                    raise ValueError('Invalid source route in '+row['instance_id'])
+                if route['hop_count'] != len(route['edges']):
+                    raise ValueError('Relation-count mismatch')
+                if key=='reference_paths' and endpoint(route) not in row['target_files']:
+                    raise ValueError('Reference endpoint mismatch')
+        if row.get('graph_source_verified'):
+            shortest = min(p['hop_count'] for p in row['reference_paths'])
+            if shortest!=row['shortest_verified_hops']:
+                raise ValueError('Shortest reference-route mismatch')
+    if any(not r.get('graph_source_verified') or r.get('category')!=r.get('verified_category')
+           or r.get('hop_group')!=r.get('verified_hop_group') for r in lite):
+        raise ValueError('Lite requires source-verified paths and labels')
     splits = json.loads((d / "splits.json").read_text())
     for name in ("grouped_standard", "heldout_repository"):
         group_to_split = {}

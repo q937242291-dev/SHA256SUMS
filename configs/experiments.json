@@ -44,7 +44,7 @@
     "DeepSeek-v3.2",
     "GPT-5.5"
   ],
-  "tool_agent": "Agentless",
+  "tool_agent": "SWE-agent",
   "tool_models": [
     "DeepSeek-v3.2",
     "GPT-5.5"
@@ -76,5 +76,18 @@
   "rate_change_unit": "percentage_points",
   "edge_f1_unit": "0_to_1",
   "figure_token_scale": 7300,
-  "figure_time_scale_seconds": 310
+  "figure_time_scale_seconds": 310,
+  "recovery_agent": "Agentless",
+  "error_agents": [
+    "Agentless",
+    "AutoCodeRover",
+    "Augment"
+  ],
+  "context_methods": [
+    "bm25-rerank",
+    "long-context",
+    "oracle-chain"
+  ],
+  "candidate_agent": "candidate-selection",
+  "candidate_model": "DeepSeek-v3.2"
 }

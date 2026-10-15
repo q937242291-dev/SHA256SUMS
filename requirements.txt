@@ -1,2 +1,1 @@
-# Core construction, baselines and evaluation use Python's standard library.
-# For figures: pip install -r requirements-figures.txt
+-r requirements-source.txt

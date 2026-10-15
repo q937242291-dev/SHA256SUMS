@@ -3,9 +3,10 @@ import argparse
 import collections
 import json
 import sys
+from datetime import date
 from pathlib import Path
 from .io import read_jsonl, write_jsonl, write_json, index_unique, public_instance, digest
-from .dataset import validate, rebuild, select_lite, build_splits
+from .dataset import validate, select_lite, select_source_lite, build_splits
 from .metrics import score_run, aggregate, paired_metrics, response_labels
 from .repository import get_snapshot
 from .baselines import run_baseline
@@ -121,7 +122,7 @@ def cmd_evaluate(args):
         if args.auto_audit:
             if snapshot is None:
                 raise ValueError("Automatic source audit requires the immutable pre-fix repository")
-            from .source_graph import SourceGraph
+            from .artifact_graph import ArtifactGraph as SourceGraph
             graph_key = (inst["repo"], inst["base_commit"])
             if graph_key not in graphs:
                 graphs[graph_key] = SourceGraph(snapshot)
@@ -161,12 +162,65 @@ def cmd_pair(args):
 
 
 def cmd_build(args):
-    records = rebuild(args.archive, args.out)
-    lite = select_lite(records)
+    from .annotation import annotate, patch_spans, base_revision_targets
+    from .source_cache import export_source_cache
+    instances = list(read_jsonl(args.instances))
+    construction = index_unique(read_jsonl(args.construction))
+    repos = _json(args.repo_map)
+    targets=index_unique(read_jsonl(args.targets)) if args.targets else {}
+    source_files=collections.defaultdict(list)
+    if args.source_manifest:
+        for row in read_jsonl(args.source_manifest):
+            source_files[(row['repo'],row['base_commit'])].append(row)
+    records, truths = [], []
+    for instance in instances:
+        snapshot = get_snapshot(instance,repos)
+        spans = patch_spans(construction[instance['instance_id']]['patch'])
+        available=set(snapshot.files())
+        files=(base_revision_targets(targets[instance['instance_id']]['target_files'],construction[instance['instance_id']]['patch'])
+               if instance['instance_id'] in targets else sorted({span['file'] for span in spans if span['file'] in available}))
+        selected=source_files.get((instance['repo'],instance['base_commit']))
+        if selected:
+            for row in selected:
+                if snapshot.blob_sha(row['file'])!=row['git_blob']:
+                    raise ValueError('Source-manifest Git object mismatch')
+        truth = annotate(instance,{'target_files':files},snapshot,
+                         [span for span in spans if span['file'] in files],
+                         negative_limit=max(12,len(targets.get(instance['instance_id'],{}).get('hard_negative_paths',[]))),
+                         files=[row['file'] for row in selected] if selected else None)
+        truths.append(truth)
+        records.append({**instance,**truth})
+    lite = select_lite(records) if args.paper_strata else select_source_lite(records)
+    byid={r['instance_id']:r for r in records}
+    for truth in truths:
+        for key in ('category','verified_category','category_provenance'):
+            truth[key]=byid[truth['instance_id']][key]
     out = Path(args.out)
+    write_jsonl(out / 'issuechain_full.jsonl',records)
+    write_jsonl(out / 'instances.jsonl',instances)
+    write_jsonl(out / 'evaluator.jsonl',truths)
+    write_jsonl(out / 'construction_inputs.jsonl',construction.values())
     write_jsonl(out / "issuechain_lite.jsonl", lite)
     write_json(out / "lite_ids.json", [r["instance_id"] for r in lite])
     write_json(out / "splits.json", build_splits(records))
+    span_count=export_source_cache(instances,truths,repos,out/'source_spans.jsonl.gz')
+    if args.source_manifest:
+        write_jsonl(out / 'source_manifest.jsonl',
+                    (row for rows in source_files.values() for row in rows))
+    write_json(out / 'dataset_spec.json',{
+        'version':'1.3','release_date':date.today().isoformat(),'seed':2027,
+        'full_records':len(records),'lite_records':len(lite),
+        'unique_source_revision_tasks':len({(r['repo'],r['source_instance_id'],r['base_commit']) for r in records}),
+        'repositories':len({r['repo'] for r in records}),
+        'reference_path_records':sum(len(r['reference_paths']) for r in records),
+        'hard_negative_records':sum(len(r['hard_negative_paths']) for r in records),
+        'tasks_with_verified_references':sum(bool(r['reference_paths']) for r in records),
+        'lite_categories':dict(collections.Counter(r['category'] for r in lite)),
+        'lite_hops':dict(collections.Counter(r['hop_group'] for r in lite)),
+        'source_span_records':span_count,
+        'source_manifest_records':sum(map(len,source_files.values())),
+        'annotation_method':'static_source_binding',
+        'source_scope':'manifest' if args.source_manifest else 'repository'})
     print(json.dumps(validate(out), ensure_ascii=False))
 
 
@@ -206,7 +260,7 @@ def cmd_map(args):
 
 
 def cmd_graph(args):
-    from .source_graph import SourceGraph
+    from .artifact_graph import ArtifactGraph as SourceGraph
     instances, truths = _cohort(args)
     repos = _json(args.repo_map)
     for instance in instances:
@@ -255,7 +309,9 @@ def main(argv=None):
         q.add_argument("--max-output-tokens", type=int, default=4096)
         q.add_argument("--max-steps", type=int, default=15)
     q = sub.add_parser("validate-data"); q.add_argument("--data", default="data"); q.set_defaults(func=lambda a: print(json.dumps(validate(a.data), ensure_ascii=False)))
-    q = sub.add_parser("build-data"); q.add_argument("--archive", required=True); q.add_argument("--out", required=True); q.set_defaults(func=cmd_build)
+    q = sub.add_parser('build-data'); q.add_argument('--instances',required=True); q.add_argument('--construction',required=True)
+    q.add_argument('--targets'); q.add_argument('--source-manifest')
+    q.add_argument('--repo-map',required=True); q.add_argument('--paper-strata',action='store_true'); q.add_argument('--out',required=True); q.set_defaults(func=cmd_build)
     q = sub.add_parser("run"); data_args(q); model_args(q)
     q.add_argument("--method", required=True, choices=["ptrace", "bm25", "bm25-rerank", "long-context", "oracle-chain", "candidate-selection", "reference-staged", "reference-structured", "reference-native", "external"])
     q.add_argument("--repo-map"); q.add_argument("--agent-config"); q.add_argument("--truth"); q.add_argument("--max-chars", type=int, default=60000); q.add_argument("--out", required=True); q.set_defaults(func=cmd_run)

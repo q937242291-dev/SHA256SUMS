@@ -4,7 +4,7 @@ Trajectory-aware evaluation for software engineering agents, with IssueChainBenc
 
 ## Quick start
 
-Requirements: **Python 3.10+** and **Git**. Run commands from the project directory. The core implementation uses the Python standard library.
+Requirements: **Python 3.10+** and **Git**. Run commands from the project directory. Install `requirements.txt` for source auditing across the four supported languages.
 
 ```bash
 python -m ptrace validate-data --data data
@@ -25,19 +25,19 @@ ptrace --help
 
 | Dataset | Task records | Repositories | Reference-path records | Hard-negative records |
 |---|---:|---:|---:|---:|
-| IssueChainBench Full | 1,547 | 29 | 4,641 | 19,043 |
+| IssueChainBench Full | 1,547 | 29 | 1,380 | 9,373 |
 | IssueChainBench Lite | 300 | Subset of Full | Included in each record | Included in each record |
 
 Lite uses the following category and hop strata. Each axis totals 300 records.
 
 | Category | Count | Hop stratum | Count |
 |---|---:|---|---:|
-| None | 39 | 1-3 | 151 |
-| Configuration | 57 | 4-5 | 89 |
-| Lexical | 60 | 6+ | 60 |
-| Security FP | 45 | | |
-| Structural | 54 | | |
-| Symptom | 45 | | |
+| None | 32 | 1-3 | 269 |
+| Configuration | 1 | 4-5 | 27 |
+| Lexical | 135 | 6+ | 4 |
+| Security FP | 45 |  |  |
+| Structural | 28 |  |  |
+| Symptom | 59 |  |  |
 
 Lite records are identical to their corresponding Full records. Full retains source task variants; Lite selects each underlying issue once. Supervised splits group variants of the same underlying issue in one partition.
 
@@ -50,10 +50,12 @@ Lite records are identical to their corresponding Full records. Full retains sou
 | `data/instances.jsonl` | Public agent inputs |
 | `data/evaluator.jsonl` | Evaluation targets, reference relations, and strata |
 | `data/construction_inputs.jsonl` | Source patches, test patches, and repair-validation requirements |
+| `data/source_spans.jsonl.gz` | Commit-pinned source snippets and content hashes |
+| `data/source_manifest.jsonl` | Indexed files and Git object IDs at each pre-fix revision |
 | `data/lite_ids.json` | Fixed Lite instance IDs |
 | `data/splits.json` | Grouped supervised and repository-held-out splits |
 | `data/repository_manifest.json` | Public repositories and language information |
-| `data/dataset_spec.json` | Dataset version, seed, and quotas |
+| `data/dataset_spec.json` | Actual dataset counts, source scope, category and hop strata |
 | `ptrace/` | Data, source access, baselines, metrics, guidance, and analysis |
 | `adapters/` | Official-agent process integration |
 | `configs/` | Repository maps, agent/model settings, and experiment scopes |
@@ -85,7 +87,6 @@ Use `instances.jsonl` for agent runs. `public_instance()` returns `instance_id`,
 | `target_files` | Editing-target set |
 | `reference_paths`, `hard_negative_paths` | Directed, typed reference relation records |
 | `nodes`, `edges` | Route structure, linked by `node_id`, `src`, and `dst` |
-| `structural_flags` | Route connectivity and endpoint checks |
 | `source_verified` | Recorded source-verification status of a path |
 | `verified_reference_paths` | Source-verified routes for reference-context experiments |
 | `category`, `hop_group` | Task stratification labels |
@@ -93,6 +94,21 @@ Use `instances.jsonl` for agent runs. `public_instance()` returns `instance_id`,
 | `shortest_verified_hops` | Length of the shortest verified sufficient route, when available |
 
 Route validity and support are evaluated from source checks and the run's recorded observations. Stratification labels organize the evaluation cohort.
+
+### Build from repository snapshots
+
+Prepare all Full repositories before rebuilding source annotations. The source manifest fixes the indexed file scope and checks each Git object before graph construction.
+
+```bash
+python scripts/prepare_repos.py --cohort full
+python -m ptrace build-data --instances data/instances.jsonl \
+  --construction data/construction_inputs.jsonl --targets data/evaluator.jsonl \
+  --source-manifest data/source_manifest.jsonl --repo-map configs/repo_map.json \
+  --out work/rebuilt_data
+python -m ptrace validate-data --data work/rebuilt_data
+```
+
+The output contains agent and evaluator views, Full and Lite records, source spans, fixed IDs, grouped splits, and actual annotation counts. `--targets` supplies editing-file targets and per-task negative budgets. Omit it to derive editing targets from the old side of the accepted patch. Use `--paper-strata` with `numpy` and `scipy` installed to require the paper's exact joint category/hop quotas.
 
 ## Repository setup
 
@@ -420,7 +436,7 @@ python -m ptrace ablate-context --cohort lite --runs work/mapped/runs.jsonl \
   --repo-map configs/repo_map.json --reviews work/mapped/reviews.jsonl --out work/ablation.jsonl
 ```
 
-The source graph resolves Python declarations, import aliases, relative imports, plain class methods, and direct test calls. `map-observations` admits only relations whose anchors occur in recorded spans. Context removal re-audits complete alternatives after removing each observation.
+The source graph resolves Python declarations, import aliases, relative imports, local constructor types, configuration readers, Go receiver methods, and JavaScript-family imports and calls. `map-observations` admits only relations whose anchors occur in recorded spans. Context removal re-audits complete alternatives after removing each observation.
 
 ## Exact runtime prompts
 
@@ -438,3 +454,15 @@ python -m ptrace evaluate --cohort lite --runs work/verifier.jsonl \
 ```
 
 The verifier receives baseline candidate proposals and admitted source spans. Its configured ratings reorder and threshold candidates. Independent source audits determine PV, TV, Support, and FC. Cumulative resource totals and verifier-only token/time increments are both retained.
+
+## Paper study scopes
+
+Tables 2 and 10-12 use SWE-agent on Lite. Configure its pinned official runtime before the paper guidance study:
+
+```bash
+python scripts/run_experiment.py --method external --cohort lite \
+  --repo-map configs/repo_map.json --agent-config configs/agents/sweagent.json \
+  --model-label DeepSeek-v3.2 --out work/sweagent_study
+```
+
+Repeat with the configured GPT-5.5 deployment. `scripts/run_matrix.py --guided` selects SWE-agent and the two tool models from `configs/experiments.json`. Table 6 selects Agentless, Table 7 selects Agentless/AutoCodeRover/Augment, and Table 9 selects DeepSeek-v3.2 candidate recognition on Lite. Published values from Tables 2 and 9-12 are in `data/paper_tables/`.

@@ -1,0 +1,228 @@
+{
+  "source": {
+    "document": "WWW2027_issuebench (2).pdf",
+    "sha256": "b4d797397a69a64b630a5195707d0a610ac3bbfe917aa50d50d1ed5708394ae4",
+    "page": 8
+  },
+  "kind": "paper_reported_table",
+  "aggregate": [
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "mode": "check",
+      "C_FCred": 20,
+      "FCred_pp": 5.67,
+      "C_PVgain": 3,
+      "DeltaPV_pp": 1.0,
+      "DeltaTokens": 98.9,
+      "DeltaFiles": 0.32,
+      "DeltaTime_s": 0.59
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "mode": "trap",
+      "C_FCred": 17,
+      "FCred_pp": 5.0,
+      "C_PVgain": 2,
+      "DeltaPV_pp": 0.67,
+      "DeltaTokens": 71.5,
+      "DeltaFiles": 0.41,
+      "DeltaTime_s": 0.29
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "mode": "multi",
+      "C_FCred": 25,
+      "FCred_pp": 7.0,
+      "C_PVgain": 4,
+      "DeltaPV_pp": 1.0,
+      "DeltaTokens": 74.1,
+      "DeltaFiles": 0.07,
+      "DeltaTime_s": 0.65
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "mode": "check",
+      "C_FCred": 10,
+      "FCred_pp": 3.0,
+      "C_PVgain": 4,
+      "DeltaPV_pp": 1.0,
+      "DeltaTokens": 272.4,
+      "DeltaFiles": 0.29,
+      "DeltaTime_s": 3.9
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "mode": "trap",
+      "C_FCred": 18,
+      "FCred_pp": 5.0,
+      "C_PVgain": 9,
+      "DeltaPV_pp": 2.67,
+      "DeltaTokens": 217.4,
+      "DeltaFiles": -0.17,
+      "DeltaTime_s": 3.06
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "mode": "multi",
+      "C_FCred": 9,
+      "FCred_pp": 2.67,
+      "C_PVgain": 3,
+      "DeltaPV_pp": 1.0,
+      "DeltaTokens": 421.5,
+      "DeltaFiles": 0.18,
+      "DeltaTime_s": 7.03
+    }
+  ],
+  "category_variants": [
+    {
+      "model": "DeepSeek-v3.2",
+      "agent": "SWE-agent",
+      "category": "None",
+      "n": 39,
+      "mode": "check",
+      "DeltaPV_pp": 0,
+      "FCred_pp": 2.56,
+      "DeltaFile_pp": 0,
+      "DeltaSupport_pp": 2.56,
+      "DeltaEdgeF1": 0.006
+    },
+    {
+      "model": "DeepSeek-v3.2",
+      "agent": "SWE-agent",
+      "category": "Configuration",
+      "n": 57,
+      "mode": "check",
+      "DeltaPV_pp": 0,
+      "FCred_pp": 0,
+      "DeltaFile_pp": 0,
+      "DeltaSupport_pp": 0,
+      "DeltaEdgeF1": 0
+    },
+    {
+      "model": "DeepSeek-v3.2",
+      "agent": "SWE-agent",
+      "category": "Lexical",
+      "n": 60,
+      "mode": "multi",
+      "DeltaPV_pp": 3.33,
+      "FCred_pp": 10,
+      "DeltaFile_pp": -8.33,
+      "DeltaSupport_pp": 1.67,
+      "DeltaEdgeF1": 0.004
+    },
+    {
+      "model": "DeepSeek-v3.2",
+      "agent": "SWE-agent",
+      "category": "Security FP",
+      "n": 45,
+      "mode": "trap",
+      "DeltaPV_pp": 2.22,
+      "FCred_pp": 4.44,
+      "DeltaFile_pp": -2.22,
+      "DeltaSupport_pp": 2.22,
+      "DeltaEdgeF1": 0.011
+    },
+    {
+      "model": "DeepSeek-v3.2",
+      "agent": "SWE-agent",
+      "category": "Structural",
+      "n": 54,
+      "mode": "trap",
+      "DeltaPV_pp": 0,
+      "FCred_pp": -5.56,
+      "DeltaFile_pp": 5.56,
+      "DeltaSupport_pp": 0,
+      "DeltaEdgeF1": 0.007
+    },
+    {
+      "model": "DeepSeek-v3.2",
+      "agent": "SWE-agent",
+      "category": "Symptom",
+      "n": 45,
+      "mode": "multi",
+      "DeltaPV_pp": 0,
+      "FCred_pp": 2.22,
+      "DeltaFile_pp": -2.22,
+      "DeltaSupport_pp": 0,
+      "DeltaEdgeF1": 0.028
+    },
+    {
+      "model": "GPT-5.5",
+      "agent": "SWE-agent",
+      "category": "None",
+      "n": 39,
+      "mode": "trap",
+      "DeltaPV_pp": 2.56,
+      "FCred_pp": 2.56,
+      "DeltaFile_pp": -2.56,
+      "DeltaSupport_pp": 0,
+      "DeltaEdgeF1": 0.009
+    },
+    {
+      "model": "GPT-5.5",
+      "agent": "SWE-agent",
+      "category": "Configuration",
+      "n": 57,
+      "mode": "check",
+      "DeltaPV_pp": 0,
+      "FCred_pp": 0,
+      "DeltaFile_pp": 0,
+      "DeltaSupport_pp": 0,
+      "DeltaEdgeF1": 0
+    },
+    {
+      "model": "GPT-5.5",
+      "agent": "SWE-agent",
+      "category": "Lexical",
+      "n": 60,
+      "mode": "trap",
+      "DeltaPV_pp": 3.33,
+      "FCred_pp": 3.33,
+      "DeltaFile_pp": 0,
+      "DeltaSupport_pp": 3.33,
+      "DeltaEdgeF1": 0.002
+    },
+    {
+      "model": "GPT-5.5",
+      "agent": "SWE-agent",
+      "category": "Security FP",
+      "n": 45,
+      "mode": "multi",
+      "DeltaPV_pp": 2.22,
+      "FCred_pp": 2.22,
+      "DeltaFile_pp": 0,
+      "DeltaSupport_pp": 2.22,
+      "DeltaEdgeF1": 0.012
+    },
+    {
+      "model": "GPT-5.5",
+      "agent": "SWE-agent",
+      "category": "Structural",
+      "n": 54,
+      "mode": "multi",
+      "DeltaPV_pp": 0,
+      "FCred_pp": 0,
+      "DeltaFile_pp": 0,
+      "DeltaSupport_pp": 0,
+      "DeltaEdgeF1": 0.161
+    },
+    {
+      "model": "GPT-5.5",
+      "agent": "SWE-agent",
+      "category": "Symptom",
+      "n": 45,
+      "mode": "check",
+      "DeltaPV_pp": 0,
+      "FCred_pp": 0,
+      "DeltaFile_pp": 0,
+      "DeltaSupport_pp": 0,
+      "DeltaEdgeF1": -0.055
+    }
+  ]
+}

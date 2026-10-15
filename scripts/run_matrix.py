@@ -17,6 +17,8 @@ def main():
     p.add_argument("--limit", type=int)
     p.add_argument("--guided", action="store_true")
     args = p.parse_args()
+    if args.guided and args.cohort != "lite":
+        p.error("The paper guidance matrix uses --cohort lite")
     cfg = json.loads(Path(args.config).read_text())
     paper = json.loads(Path("configs/experiments.json").read_text())
     for agent, agent_config in cfg["agents"].items():

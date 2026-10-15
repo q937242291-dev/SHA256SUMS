@@ -7,8 +7,9 @@ from .io import repo_path
 
 
 class Snapshot:
-    def __init__(self, directory, revision):
+    def __init__(self, directory, revision, repo=None):
         self.directory = Path(directory).resolve()
+        self.repo = repo
         if not re.fullmatch(r"[0-9a-fA-F]{7,40}", revision or ""):
             raise ValueError("Use a real pre-fix commit SHA, not a branch or accepted patch ID")
         self.revision = revision
@@ -55,8 +56,11 @@ class Snapshot:
         return {"kind": "source", "file": repo_path(filename), "start_line": start, "end_line": end,
                 "base_commit": self.revision, "sha256": hashlib.sha256(text.encode()).hexdigest()}
 
+    def blob_sha(self,filename):
+        return self._git('rev-parse',self.revision+':'+repo_path(filename)).decode().strip()
+
 
 def get_snapshot(instance, repo_map):
     if instance["repo"] not in repo_map:
         raise ValueError("Repository missing from repo map")
-    return Snapshot(repo_map[instance["repo"]], instance["base_commit"])
+    return Snapshot(repo_map[instance["repo"]], instance["base_commit"], repo=instance["repo"])

@@ -19,15 +19,19 @@ def summaries(scores, out):
     out = Path(out)
     groups = collections.defaultdict(list)
     for s in scores:
-        groups[(s.get("agent"), s.get("model"), s.get("condition"))].append(s)
+        groups[(s.get("agent"), s.get("model"), s.get("condition"), s.get("protocol"))].append(s)
     flattened = []
-    for (agent, model, condition), rows in sorted(groups.items(), key=lambda x: str(x[0])):
+    for (agent, model, condition, protocol), rows in sorted(groups.items(), key=lambda x: str(x[0])):
         summary = aggregate(rows)
-        item = {"agent": agent, "model": model, "condition": condition, "record_n": len(rows)}
+        item = {"agent": agent, "model": model, "condition": condition, "protocol": protocol, "record_n": len(rows)}
         for metric, value in summary.items():
             if "value" in value:
                 item[metric] = value["value"]
                 item[metric + "_n"] = value["eligible_n"]
+        common = [r for r in rows if r.get("TV") is not None and r.get("Support@5") is not None]
+        den = sum(r.get("weight", 1) for r in common)
+        item["TV_minus_Support_pp"] = 100 * sum(r.get("weight", 1) * (r["TV"] - r["Support@5"]) for r in common) / den if den else None
+        item["TV_minus_Support_n"] = len(common)
         flattened.append(item)
     write_csv(out / "agent_summary.csv", flattened)
     strata = []
@@ -35,10 +39,10 @@ def summaries(scores, out):
     for s in scores:
         for axis, key in (("category", "category"), ("hop", "hop_group")):
             if s.get(key) is not None:
-                groups[(s.get("agent"), s.get("model"), s.get("condition"), axis, s[key])].append(s)
-    for (agent, model, condition, axis, stratum), rows in sorted(groups.items(), key=lambda x: str(x[0])):
+                groups[(s.get("agent"), s.get("model"), s.get("condition"), s.get("protocol"), axis, s[key])].append(s)
+    for (agent, model, condition, protocol, axis, stratum), rows in sorted(groups.items(), key=lambda x: str(x[0])):
         summary = aggregate(rows)
-        item = {"agent": agent, "model": model, "condition": condition, "axis": axis, "stratum": stratum, "n": len(rows)}
+        item = {"agent": agent, "model": model, "condition": condition, "protocol": protocol, "axis": axis, "stratum": stratum, "n": len(rows)}
         for metric, value in summary.items():
             if "value" in value:
                 item[metric] = value["value"]
@@ -51,9 +55,13 @@ def summaries(scores, out):
 def paper_tables(scores, lite_ids, out):
     """Export paper-scope tables from per-run metric records."""
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
+    config = json.loads((Path(__file__).resolve().parents[1] / "configs/experiments.json").read_text())
+    lite_ids = set(lite_ids)
     base = [s for s in scores if s.get("condition") == "baseline"]
-    full = base
-    lite = [s for s in base if s["instance_id"] in set(lite_ids)]
+    native = [s for s in base if s.get("agent") in config["native_agents"] and s.get("model") in config["models"] and s.get("protocol") == "native"]
+    selected_chains = [s for s in base if s.get("agent") in config["selected_chain_agents"] and s.get("model") in config["selected_chain_models"]]
+    full = native + selected_chains
+    lite = [s for s in native if s["instance_id"] in lite_ids]
     full_summary, _ = summaries(full, out / "full")
     lite_summary, strata = summaries(lite, out / "lite")
     write_csv(out / "table1_full_agents.csv", full_summary)
@@ -64,15 +72,21 @@ def paper_tables(scores, lite_ids, out):
         groups[(s["agent"], s["model"])].append(s)
     for (agent, model), group in groups.items():
         # Unweighted counts are labelled separately from metric averages.
+        if agent in config["selected_chain_agents"]:
+            available = [s for s in group if s.get("File@5") is not None]
+            hit_rows.append({"agent": agent, "model": model, "eligible_n": len(available),
+                             "hits": sum(s["File@5"] for s in available), "false_credit": None,
+                             "supported_hits": None})
+            continue
         common = [s for s in group if all(s.get(k) is not None for k in ("File@5", "FC@5", "Support@5"))]
         hit_rows.append({"agent": agent, "model": model, "eligible_n": len(common),
                          "hits": sum(s["File@5"] for s in common), "false_credit": sum(s["FC@5"] for s in common),
                          "supported_hits": sum(s["Support@5"] for s in common)})
     write_csv(out / "table4_hit_counts.csv", hit_rows)
-    write_csv(out / "table6_recovery.csv", [{k: r.get(k) for k in ("agent", "model", "Detour", "Detour_n", "Recovery", "Recovery_n", "RecoveryAfterDetour", "RecoveryAfterDetour_n")} for r in lite_summary])
+    write_csv(out / "table6_recovery.csv", [{k: r.get(k) for k in ("agent", "model", "Detour", "Detour_n", "Recovery", "Recovery_n", "RecoveryAfterDetour", "RecoveryAfterDetour_n")} for r in lite_summary if r["agent"] == config["recovery_agent"]])
     error_groups = collections.defaultdict(list)
     for s in lite:
-        if s.get("MeanPosition") is not None:
+        if s.get("agent") in config["error_agents"] and s.get("MeanPosition") is not None:
             error_groups[(s["agent"], s["model"], s["category"])].append(s)
     errors = []
     for (agent, model, category), rows in error_groups.items():
@@ -82,26 +96,32 @@ def paper_tables(scores, lite_ids, out):
                        "H3": sum(s["MeanPosition"] == 3 for s in rows), "H4plus": sum(s["MeanPosition"] >= 4 for s in rows),
                        "Hop1Error": summary["Hop1Error"]["value"], "MeanPosition": summary["MeanPosition"]["value"]})
     write_csv(out / "table7_first_errors.csv", errors)
-    context = [s for s in scores if s.get("agent") in ("bm25-rerank", "long-context", "oracle-chain")]
+    context = [s for s in base if s.get("agent") in config["context_methods"]]
     table8, _ = summaries(context, out / "context")
     write_csv(out / "table8_context_inputs.csv", table8)
-    selection = [s for s in scores if s.get("agent") == "candidate-selection"]
+    selection = [s for s in scores if s.get("agent") == config["candidate_agent"] and s.get("model") == config["candidate_model"] and s["instance_id"] in lite_ids]
     table9, _ = summaries(selection, out / "candidate")
+    for row in table9:
+        observations = [s for s in selection if all(s.get(k) == row.get(k) for k in ("agent", "model", "condition", "protocol"))
+                        and s.get("status") == "completed" and s.get("candidate_outcome") in ("reference", "distractor", "invalid")]
+        row["recognition_n"] = len(observations)
+        for label, column in (("reference", "Correct"), ("distractor", "Distractor"), ("invalid", "Invalid")):
+            row[column] = sum(s["candidate_outcome"] == label for s in observations) if observations else None
     write_csv(out / "table9_candidate_recognition.csv", table9)
-    guided = [s for s in scores if s.get("condition") in ("check", "trap", "multi") and s["instance_id"] in set(lite_ids)]
-    pairs, responses = paired_metrics(lite, guided, 5)
+    tool_base = [s for s in lite if s["agent"] == config["tool_agent"] and s["model"] in config["tool_models"]]
+    guided = [s for s in scores if s.get("condition") in config["tool_modes"] and s.get("agent") == config["tool_agent"] and s.get("model") in config["tool_models"] and s["instance_id"] in lite_ids and s.get("protocol") == "native"]
+    pairs, responses = paired_metrics(tool_base, guided, 5)
     write_csv(out / "table2_guidance.csv", pairs)
     write_csv(out / "table10_transitions.csv", pairs)
     categories = []
     for category in ("None", "Configuration", "Lexical", "Security FP", "Structural", "Symptom"):
-        bs, gs = [s for s in lite if s.get("category") == category], [s for s in guided if s.get("category") == category]
+        bs, gs = [s for s in tool_base if s.get("category") == category], [s for s in guided if s.get("category") == category]
         rows, _ = paired_metrics(bs, gs, 5)
         categories.extend({"category": category, **r} for r in rows)
-    config = json.loads((Path(__file__).resolve().parents[1] / "configs/experiments.json").read_text())
     variants = config["category_variants"]
     selected = [r for r in categories if variants.get(r["model"], {}).get(r["category"]) == r["mode"]]
     for item in selected:
-        bs = {b["run_id"]: b for b in lite if b["agent"] == item["agent"] and b["model"] == item["model"] and b.get("category") == item["category"]}
+        bs = {b["run_id"]: b for b in tool_base if b["agent"] == item["agent"] and b["model"] == item["model"] and b.get("category") == item["category"]}
         pp = [(bs[g["baseline_run_id"]],g) for g in guided if g.get("baseline_run_id") in bs and g["condition"] == item["mode"]]
         common = [(b,g) for b,g in pp if all(r.get(k) is not None for r in (b,g) for k in ("File@5","FC@5","Support@5"))]
         item["common_outcome_pair_n"] = len(common)

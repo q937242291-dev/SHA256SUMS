@@ -228,10 +228,13 @@ class SourceGraph:
         self._edge_index[edge_key(route, edge)].append(edge)
 
     def relation(self, source, destination, relation):
+        matches = self.relation_candidates(source, destination, relation)
+        return matches[0] if matches else None
+
+    def relation_candidates(self, source, destination, relation):
         route = {"nodes": [{**source, "node_id": "s"}, {**destination, "node_id": "d"}]}
         key = edge_key(route, {"src": "s", "dst": "d", "relation": relation})
-        matches = self._edge_index.get(key, [])
-        return matches[0] if matches else None
+        return self._edge_index.get(key, [])
 
     def issue_edges(self, instance):
         text = instance["problem_statement"]
@@ -262,7 +265,7 @@ class SourceGraph:
             expansions += 1
             last = self.nodes[node_ids[-1]]
             if endpoints is None or last["file"] in endpoints:
-                result.append({"route_id": "path-" + digest([node_ids, [e["relation"] for e in edges]])[:16],
+                result.append({"route_id": "path-" + digest([node_ids, [e["edge_id"] for e in edges]])[:16],
                                "nodes": [issue] + [dict(self.nodes[n]) for n in node_ids[1:]],
                                "edges": [dict(e) for e in edges]})
             if len(edges) >= max_hops:

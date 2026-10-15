@@ -68,6 +68,25 @@ def graph_fixture():
 
 
 class SourceMethodsTests(unittest.TestCase):
+    def test_observed_second_call_site_preserves_early_prefix_support(self):
+        snapshot=SourceSnapshot({'pkg/api.py':'from .core import compute as transform\n\ndef entry(x):\n    value=x\n    first=transform(value)\n    return transform(first)\n',
+                                 'pkg/core.py':'def compute(x):\n    return x+1\n'})
+        instance={'instance_id':'repeated-call','repo':'example/pkg','base_commit':snapshot.revision,
+                  'problem_statement':'entry returns an incorrect value.'}
+        truth={'target_files':['pkg/core.py']}
+        observations=[]
+        for step,file,start,end in [(1,'pkg/api.py',1,4),(2,'pkg/api.py',6,6),
+                                     (2,'pkg/core.py',1,2),(3,'pkg/api.py',5,5)]:
+            observations.append({'step':step,'base_commit':snapshot.revision,
+                                 'spans':[{'file':file,'start_line':start,'end_line':end,'text':snapshot.span(file,start,end)}]})
+        graph=SourceGraph(snapshot)
+        run={'run_id':'repeat','predicted_files':['pkg/core.py'],'observations':observations}
+        run['routes']=observed_routes(instance,run,snapshot,graph)
+        self.assertEqual(len({r['route_id'] for r in run['routes']}),len(run['routes']))
+        reviews={(run['run_id'],r['route_id']):graph_review(instance,truth,run,r,graph) for r in run['routes']}
+        timeline=support_timeline(instance,truth,run,reviews,snapshot)
+        self.assertEqual(next(row['Support@5'] for row in timeline if row['step']==2),1)
+
     def test_relative_import_alias_resolves_cross_file_call(self):
         snapshot, instance, truth, graph, run, review = graph_fixture()
         self.assertEqual([e["relation"] for e in run["routes"][0]["edges"]], ["mentions", "calls"])
@@ -100,6 +119,8 @@ class SourceMethodsTests(unittest.TestCase):
         snapshot.content["pkg/api.py"] = "from .core import compute as transform\n\ndef entry(transform):\n    return transform(1)\n"
         graph = SourceGraph(snapshot)
         self.assertFalse(any(e["relation"] == "calls" for e in graph.edges))
+        review=graph_review(instance,truth,run,run['routes'][0],graph)
+        self.assertIsNone(review['edge_support'][run['routes'][0]['edges'][-1]['edge_id']]['supported'])
 
     def test_nested_function_call_is_not_attributed_to_outer_function(self):
         snapshot = SourceSnapshot({"a.py": "def target():\n    return 1\n\ndef entry():\n    def inner():\n        return target()\n    return 2\n"})

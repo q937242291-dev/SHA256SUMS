@@ -1,0 +1,18 @@
+{
+  "source": {
+    "document": "WWW2027_issuebench (2).pdf",
+    "sha256": "b4d797397a69a64b630a5195707d0a610ac3bbfe917aa50d50d1ed5708394ae4",
+    "page": 13
+  },
+  "kind": "paper_reported_table",
+  "rows": [
+    {
+      "model": "DeepSeek-v3.2",
+      "File@1_percent": 25.33,
+      "File@5_percent": 69.33,
+      "Correct": 163,
+      "Distractor": 112,
+      "Invalid": 25
+    }
+  ]
+}

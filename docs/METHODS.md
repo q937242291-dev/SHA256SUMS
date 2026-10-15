@@ -2,8 +2,8 @@
 
 | Paper component | Source | Entry point |
 |---|---|---|
-| Revision-grounded artifacts and directed relations | `ptrace/source_graph.py` | `SourceGraph`, `build-graph` |
-| Issue anchoring and reference alternatives | `ptrace/construction.py` | `build-reference` |
+| Revision-grounded artifacts and directed relations | `ptrace/artifact_graph.py`, `ptrace/syntax_graph.py` | `ArtifactGraph`, `build-graph` |
+| Issue anchoring and reference alternatives | `ptrace/annotation.py`, `ptrace/construction.py` | `build-data`, `build-reference` |
 | Observation-to-route map, Pi | `ptrace/observed.py` | `observed_routes`, `map-observations` |
 | Eq. (1): route validity | `ptrace/audit.py` | `audit_route` |
 | Eq. (2): target-paired support | `ptrace/metrics.py` | `evidence_support` |
@@ -30,7 +30,7 @@
 
 `Snapshot` reads Git objects at `base_commit`. Source anchors contain file, line range, commit, and SHA-256. Observation checks compare returned source text and revision; prefixes use only observations at or before that step.
 
-The Python index resolves module-level functions, import aliases, relative imports, plain class methods, and direct test calls. Shadowed bindings, decorated call targets, inherited dispatch, and dynamic attribute lookup remain unresolved. Other languages and semantic bindings use the same source-anchor review schema.
+The source index includes Python declarations, imports, values, direct calls, and local constructor bindings; Go package functions and receiver methods; JavaScript/TypeScript named imports, aliases, CommonJS exports, and class methods. Source reviews use commit-pinned spans for every relation. The annotation module builds connected alternatives, checks their endpoints, constructs artifact substitutions at verified binding sites, and counts relations for hop strata.
 
 Support takes the maximum over complete audited routes ending in both the top-k predictions and the target set. Source-verified alternatives outside stored references qualify. The selected route determines PV; all observed valid routes determine TV. Relation identity uses artifact paths and symbols independently of descriptive prose.
 
@@ -47,3 +47,7 @@ FC reduction includes favorable transitions and regressions. Favorable correctio
 ## Experiment scopes
 
 `configs/experiments.json` fixes model labels, agent groups, guidance variants, and scopes. Full is used for Tables 1, 4, and 8. Lite is used for Tables 2, 5-7, 9-12, and Figure 3. Resource profiles use the paper's fixed token and time scales. Display model labels and actual provider deployment IDs are recorded separately.
+
+Tables 2 and 10-12 use SWE-agent with DeepSeek-v3.2 and GPT-5.5. Table 6 uses Agentless. Table 7 uses Agentless, AutoCodeRover, and Augment. Table 9 uses DeepSeek-v3.2 candidate-chain recognition on Lite. Protocol groups are aggregated independently. Selected-chain File@5 hit counts use observed file predictions; support counts use their own observed-field cohort.
+
+Published numeric values for Tables 2 and 9-12 are stored in `data/paper_tables/`, with source document hashes, page numbers, and units.

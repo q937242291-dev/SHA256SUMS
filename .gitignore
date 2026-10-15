@@ -9,3 +9,4 @@ work/
 outputs/
 repos/
 *.log
+data/.issuechain_full.jsonl.*

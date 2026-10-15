@@ -8,7 +8,7 @@ from .guidance import MODE_INSTRUCTIONS, transition
 from .io import index_unique, public_instance, write_json, write_jsonl
 from .metrics import aggregate, paired_metrics, response_labels, score_run
 from .observed import graph_review, observed_routes, support_timeline, context_profile
-from .source_graph import SourceGraph
+from .artifact_graph import ArtifactGraph as SourceGraph
 from .repository import get_snapshot
 from .reporting import write_csv
 

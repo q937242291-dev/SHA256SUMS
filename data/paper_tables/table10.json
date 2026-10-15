@@ -1,0 +1,70 @@
+{
+  "source": {
+    "document": "WWW2027_issuebench (2).pdf",
+    "sha256": "b4d797397a69a64b630a5195707d0a610ac3bbfe917aa50d50d1ed5708394ae4",
+    "page": 13
+  },
+  "kind": "paper_reported_table",
+  "rows": [
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "mode": "check",
+      "FC_plus": 20,
+      "FC_minus": 3,
+      "PV_plus": 3,
+      "PV_minus": 0,
+      "Tokens_per_FC_plus": 1483.5
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "mode": "trap",
+      "FC_plus": 17,
+      "FC_minus": 2,
+      "PV_plus": 2,
+      "PV_minus": 0,
+      "Tokens_per_FC_plus": 1261.8
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "DeepSeek-v3.2",
+      "mode": "multi",
+      "FC_plus": 25,
+      "FC_minus": 4,
+      "PV_plus": 4,
+      "PV_minus": 1,
+      "Tokens_per_FC_plus": 889.2
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "mode": "check",
+      "FC_plus": 10,
+      "FC_minus": 1,
+      "PV_plus": 4,
+      "PV_minus": 1,
+      "Tokens_per_FC_plus": 8172.0
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "mode": "trap",
+      "FC_plus": 18,
+      "FC_minus": 3,
+      "PV_plus": 9,
+      "PV_minus": 1,
+      "Tokens_per_FC_plus": 3623.3
+    },
+    {
+      "agent": "SWE-agent",
+      "model": "GPT-5.5",
+      "mode": "multi",
+      "FC_plus": 9,
+      "FC_minus": 1,
+      "PV_plus": 3,
+      "PV_minus": 0,
+      "Tokens_per_FC_plus": 14050.0
+    }
+  ]
+}

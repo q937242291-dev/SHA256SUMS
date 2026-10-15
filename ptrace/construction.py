@@ -66,14 +66,14 @@ def direct_call(snapshot, source, dest):
 
 def automatic_review(instance, truth, run, route, snapshot, graph=None):
     """Audit a proposed route using revision-specific source bindings."""
-    from .source_graph import SourceGraph
+    from .artifact_graph import ArtifactGraph as SourceGraph
     from .observed import graph_review
     return graph_review(instance, truth, run, route, graph or SourceGraph(snapshot))
 
 
 def static_reference_paths(instance, truth, snapshot, limit=3):
     """Enumerate source-verified alternatives through imports and direct calls."""
-    from .source_graph import SourceGraph
+    from .artifact_graph import ArtifactGraph as SourceGraph
     from .observed import graph_review
     graph = SourceGraph(snapshot)
     result = []
