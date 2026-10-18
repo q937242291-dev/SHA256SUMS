@@ -10,3 +10,4 @@ outputs/
 repos/
 *.log
 data/.issuechain_full.jsonl.*
+data/.issuechain_full.jsonl.*
