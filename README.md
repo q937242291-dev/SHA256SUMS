@@ -72,7 +72,16 @@ Remove `--limit 5` for the full cohort; use `--cohort full` for Full evaluation 
 | `external` | Agentless, AutoCodeRover, OpenHands, SWE-agent, Augment, Codex, and Claude Code integrations |
 
 Metrics include File@k, MRR(This section is optional and can be omitted as it is not mentioned in the paper), NDCG(This section is optional and can be omitted as it is not mentioned in the paper), PV, TV, Support, FC, HNegOv, EdgeF1, detours, recovery, resource use, paired changes, and TokPerFC. Python, Go, JavaScript, and TypeScript source bindings share the same audit interface.
+## Metrics overview
 
+| Evaluation level | Metrics | What is measured |
+|---|---|---|
+| Trajectory | Tokens, Time, Detour, Recovery | Token and time costs, detours during exploration, and recovery after a detour. |
+| Trajectory → route | TV | Whether at least one complete, valid route was observed during the run. |
+| Route | $L$, $V_i(c)$, $t(c)$, Hop-1Error, PV | Route validity, the position of the first invalid hop, and the validity of the agent-selected route. |
+| Cross-level | Support, FC | Whether the endpoints of supporting routes match the agent's predicted files. |
+
+TV evaluates whether any complete, valid route was observed; PV evaluates the route selected by the agent.
 ## Prompts and paper outputs
 
 Exact runtime prompts are in `ptrace/prompt_templates/` and [docs/PROMPTS.md](docs/PROMPTS.md). Same-agent guidance uses the recorded retrieval contract; auxiliary verifier reranking uses `configs/verifier.json`. Gold targets, paths, and labels are evaluator-only.
